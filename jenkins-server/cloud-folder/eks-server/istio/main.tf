@@ -1,18 +1,16 @@
-# helm install argocd -n argocd --create-namespace argo/argo-cd --version 7.3.11 -f terraform/values/argocd.yaml
-resource "helm_release" "argocd" {
-  count = var.target-argocd == "argocd-cluster" ? 1 : 0
-  name = "argocd"
 
-  repository       = "https://argoproj.github.io/argo-helm"
-  chart            = "argo-cd"
-  namespace        = "argocd"
-  create_namespace = true
-  version          = "7.3.11"
+module "eks-kubeconfig" {
+  source     = "hyperbadger/eks-kubeconfig/aws"
+  version    = "1.0.0"
 
-  values = [file("values/argocd.yml")]
+  depends_on = [module.eks]
+  cluster_id =  module.eks.cluster_id
+  }
+
+resource "local_file" "kubeconfig" {
+  content  = module.eks-kubeconfig.kubeconfig
+  filename = "kubeconfig_${local.name}"
 }
-
-
 # INSTALLiNG ISTIO
 
 # helm repo add istio https://istio-release.storage.googleapis.com/charts

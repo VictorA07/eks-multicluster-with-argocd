@@ -8,18 +8,9 @@ variable "instance_type" {
   }
 }
 
-variable "cluster-name" {
-  description = "cluster name based on workspace"
-  type        = map(string)
-  default     = {
-    argocd = "argocd-cluster"
-    dev   = "dev-cluster"
-    prod = "prod-cluster"
-  }
-}
 
 variable "target-argocd" {
   description = "The cluster to deploy argocd resource to"
   type        = string
-  default     = "argocd-cluster" 
+  default     = "eks-argocd" 
 }
