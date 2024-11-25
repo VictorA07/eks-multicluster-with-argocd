@@ -1,5 +1,5 @@
 #!/bin/bash
-
+set -e
 # List of Terraform workspaces to apply
 workspaces=("argocd" "dev" "prod")
 
