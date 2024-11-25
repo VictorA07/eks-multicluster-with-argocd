@@ -1,5 +1,9 @@
 
+provider "aws" {
+  region  = "eu-west-2"
+  profile = "lead"
 
+}
 variable "clusters-name" {
   type    = list(string)
   default = ["eks-argocd", "eks-dev", "eks-prod"] 

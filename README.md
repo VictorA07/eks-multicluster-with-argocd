@@ -8,7 +8,7 @@ ArgoCD target
 create and deploy using helm chart
 create and deply using kustomise
 create and deploy using argocd Applicationn and ApplicationSet
-
+stored secret using vault
 
 ## to apply setup.sh run the below script
 chmod +x apply_all.sh
