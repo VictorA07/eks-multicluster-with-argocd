@@ -9,6 +9,9 @@ create and deploy using helm chart
 create and deply using kustomise
 create and deploy using argocd Applicationn and ApplicationSet
 stored secret using vault
+dynamic variable in helm
+managing multiple helm
+
 
 ## to apply setup.sh run the below script
 chmod +x apply_all.sh
@@ -36,3 +39,46 @@ argocd login $ARGOCD_DOMAIN --username admin --password $ARGOCD_PASSWORD --insec
 
 #Creating Argocd variable
 ARGOCD_PASSWORD=$(</home/ubuntu/argocdpassword)
+
+
+module "eks" {
+  source  = "terraform-aws-modules/eks/aws"
+  version = "20.8.5"
+
+  [..]
+
+  access_entries = {
+    my_entry = {
+      kubernetes_groups = []
+      principal_arn     = local.my_role_arn
+
+      policy_associations = {
+        cluster = {
+          policy_arn = "arn:aws:eks::aws:cluster-access-policy/AmazonEKSClusterAdminPolicy"
+          access_scope = {
+            type = "cluster"
+          }
+        }
+      }
+
+
+
+      -------------------------
+      dynamic block in terraform
+
+      resource "aws_security_group" "example" {
+  name = "example-sg"
+
+  dynamic "ingress" {
+    for_each = [
+      { from_port = 22, to_port = 22, protocol = "tcp", cidr_blocks = ["10.0.0.0/16"] },
+      { from_port = 80, to_port = 80, protocol = "tcp", cidr_blocks = ["0.0.0.0/0"] }
+    ]
+    content {
+      from_port   = ingress.value.from_port
+      to_port     = ingress.value.to_port
+      protocol    = ingress.value.protocol
+      cidr_blocks = ingress.value.cidr_blocks
+    }
+  }
+}

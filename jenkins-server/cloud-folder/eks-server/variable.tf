@@ -9,8 +9,3 @@ variable "instance_type" {
 }
 
 
-variable "target-argocd" {
-  description = "The cluster to deploy argocd resource to"
-  type        = string
-  default     = "eks-argocd" 
-}

@@ -5,6 +5,6 @@ terraform {
     dynamodb_table = "chworkspacedb"
     region = "eu-west-2"
     encrypt = true
-    profile = "lead"
+    #profile = "lead"
   }
 }

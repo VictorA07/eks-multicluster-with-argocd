@@ -11,16 +11,16 @@
 # }
 data "aws_subnet" "shared_private_subnets" {
   for_each = toset([
-    "subnet-00b53e5b85a249cf4",
-    "subnet-0ef7ae75747f682be",
-    "subnet-0648f5a7ba9788a24"
+    "subnet-036abb017e30edb97",
+    "subnet-07356fc15def03f5f",
+    "subnet-036e024f7f7693281"
   ])
 
   id = each.value
 }
 
 data "aws_vpc" "shared-vpc" {
-  id = "vpc-020d4c4a5a3d3dc9e"
+  id = "vpc-035d4fef6708a3f14"
 }
 module "eks" {
   source  = "terraform-aws-modules/eks/aws"
@@ -58,6 +58,7 @@ module "eks" {
       desired_size = 2
     }
   }
+  enable_cluster_creator_admin_permissions = true
   tags = {
     Environment = "${terraform.workspace}"
     Terraform = "true"
