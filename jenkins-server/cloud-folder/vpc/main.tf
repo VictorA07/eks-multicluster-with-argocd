@@ -1,7 +1,7 @@
 
 provider "aws" {
   region  = "eu-west-2"
-  profile = "lead"
+  #profile = "lead"
 
 }
 variable "clusters-name" {

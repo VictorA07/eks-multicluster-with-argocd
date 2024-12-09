@@ -38,6 +38,7 @@ module "eks" {
     vpc-cni = {
       most_recent = true
     }
+
   }
 
   vpc_id                         = data.aws_vpc.shared-vpc.id
@@ -64,4 +65,18 @@ module "eks" {
     Terraform = "true"
 
   }
+}
+
+
+resource "aws_eks_addon" "pod_identity" {
+  cluster_name  = data.aws_eks_cluster.current.name
+  addon_name    = "eks-pod-identity-agent"
+  addon_version = "v1.2.0-eksbuild.1"
+}
+
+resource "null_resource" "cluster-config-file" {
+  provisioner "local-exec" {
+    command     = "aws eks update-kubeconfig --region eu-west-2 --name ${local.name}"
+  }
+  depends_on = [ module.eks ]
 }

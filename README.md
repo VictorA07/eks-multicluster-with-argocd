@@ -41,6 +41,38 @@ argocd login $ARGOCD_DOMAIN --username admin --password $ARGOCD_PASSWORD --insec
 ARGOCD_PASSWORD=$(</home/ubuntu/argocdpassword)
 
 
+login to pod 
+kubectl exec -it podname -- bash
+
+aws s3 ls s3://chworkspaces3
+
+Using IRSA to manage cluster, node and pod access to resources
+
+if not using module, you will need to create odic and other eks policies to access eks cluster
+data "tls_certificate" "eks" {
+  url = aws_eks_cluster.cluster.identity[0].oidc[0].issuer
+}
+
+resource "aws_iam_openid_connect_provider" "eks" {
+  client_id_list  = ["sts.amazonaws.com"]
+  thumbprint_list = [data.tls_certificate.eks.certificates[0].sha1_fingerprint]
+  url             = aws_eks_cluster.cluster.identity[0].oidc[0].issuer
+}
+
+Using IRSA enable us to manage acess to users and resoures bu=y creating roles to be assume by user/resources 
+
+## Checking cluster event
+kubectl get events -A
+kubectl get all -n istio
+
+
+
+
+
+
+
+
+
 module "eks" {
   source  = "terraform-aws-modules/eks/aws"
   version = "20.8.5"

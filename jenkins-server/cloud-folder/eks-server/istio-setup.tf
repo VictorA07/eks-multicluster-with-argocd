@@ -1,9 +1,9 @@
 
-provider "helm" {
-  kubernetes {
-    config_path = "~/.kube/config"
-  }
-}
+# provider "helm" {
+#   kubernetes {
+#     config_path = "~/.kube/config"
+#   }
+# }
 # INSTALLiNG ISTIO
 
 # helm repo add istio https://istio-release.storage.googleapis.com/charts
@@ -16,12 +16,14 @@ resource "helm_release" "istio_base" {
   chart            = "base"
   namespace        = "istio-system"
   create_namespace = true
+  cleanup_on_fail = true
   version          = "1.17.1"
 
   set {
     name  = "global.istioNamespace"
     value = "istio-system"
   }
+  depends_on = [ module.eks ]
 }
 
 # helm repo add istio https://istio-release.storage.googleapis.com/charts
@@ -34,6 +36,7 @@ resource "helm_release" "istiod" {
   chart            = "istiod"
   namespace        = "istio-system"
   create_namespace = true
+  cleanup_on_fail = true
   version          = "1.17.1"
 
   set {
@@ -67,12 +70,15 @@ resource "helm_release" "gateway" {
 
   repository       = "https://istio-release.storage.googleapis.com/charts"
   chart            = "gateway"
-  namespace        = "istio-ingress"
+  namespace        = "istio-system"
+  cleanup_on_fail = true
   create_namespace = true
   version          = "1.17.1"
+  timeout = 500
 
   depends_on = [
     helm_release.istio_base,
     helm_release.istiod
   ]
+
 }
