@@ -8,6 +8,7 @@
 
 #ignored keypair
 cluster-host.pem
+*.pem
 # Crash log files
 crash.log
 crash.*.log

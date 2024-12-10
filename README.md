@@ -28,6 +28,9 @@ resolutions: it works after upgrading terraform
 
 -Error:Unable to find remote state
 Resolutions:
+- Terraform create new target group, elb and nlb each time i reapply to fix an error, this make the anotation lb and service lb not thesame.
+Resolution:
+- Istio gateway not deploying
 
 ## how to get argocd password
 

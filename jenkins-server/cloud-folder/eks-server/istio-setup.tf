@@ -70,7 +70,7 @@ resource "helm_release" "gateway" {
 
   repository       = "https://istio-release.storage.googleapis.com/charts"
   chart            = "gateway"
-  namespace        = "istio-system"
+  namespace        = "istio-ingress"
   cleanup_on_fail = true
   create_namespace = true
   version          = "1.17.1"

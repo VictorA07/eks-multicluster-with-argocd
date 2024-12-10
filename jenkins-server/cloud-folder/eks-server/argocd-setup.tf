@@ -5,21 +5,34 @@ data "aws_acm_certificate" "argocd-cert" {
 
 #Argocd template values
 
-data "template_file" "argocd_values" {
-  template = <<-EOF
-    server:
-      service:
-        type: LoadBalancer
-        annotations:
-          service.beta.kubernetes.io/aws-load-balancer-type: nlb
-          service.beta.kubernetes.io/aws-load-balancer-arn: "${data.aws_lb.ingress-nginx.arn}"
-          service.beta.kubernetes.io/aws-load-balancer-scheme: internet-facing
-          service.beta.kubernetes.io/aws-load-balancer-ssl-cert: "${data.aws_acm_certificate.argocd-cert.arn}"
-          service.beta.kubernetes.io/aws-load-balancer-ssl-ports: "443"
-          service.beta.kubernetes.io/aws-load-balancer-backend-protocol: http
-  EOF
-  depends_on = [ helm_release.ingress_nginx ]
+resource "kubernetes_ingress" "argocd_ingress" {
+  metadata {
+    name      = "argocd-ingress"
+    namespace = "argocd"
+    annotations = {
+      "nginx.ingress.kubernetes.io/ssl-redirect"     = "false"
+      "nginx.ingress.kubernetes.io/backend-protocol" = "HTTP"
+    }
+  }
+
+  spec {
+    rule {
+      http {
+        path {
+          path     = "/"
+
+          backend {
+            service_name = "argocd-server"
+            service_port = 80
+          }
+        }
+      }
+
+      host = "argocd.hullerdata.com" # Replace with your domain
+    }
+  }
 }
+
 
 
 
@@ -33,14 +46,8 @@ resource "helm_release" "argocd" {
   namespace        = "argocd"
   create_namespace = true
   version          = "7.3.11"
-
-  set {
-    name  = "server.service.type"
-    value = "LoadBalancer"
-  }
-  values = [
-    data.template_file.argocd_values.rendered
-  ]
+  
+  values = [file("values/metric-server.yml")]
   depends_on = [ module.eks ]
 }
 
