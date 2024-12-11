@@ -9,12 +9,26 @@
 # helm repo add istio https://istio-release.storage.googleapis.com/charts
 # helm repo update
 # helm install my-istio-base-release -n istio-system --create-namespace istio/base --set global.istioNamespace=istio-system
+resource "kubernetes_namespace" "istio_system" {
+  metadata {
+    name = "istio-system"
+  }
+}
+resource "kubernetes_namespace" "istio_ingress" {
+  metadata {
+    name = "istio-ingress"
+    labels = {
+      "istio-injection" : "enabled"
+    }
+  }
+}
+
 resource "helm_release" "istio_base" {
   name = "my-istio-base-release"
 
   repository       = "https://istio-release.storage.googleapis.com/charts"
   chart            = "base"
-  namespace        = "istio-system"
+  namespace       = kubernetes_namespace.istio_system.metadata.0.name
   create_namespace = true
   cleanup_on_fail = true
   version          = "1.17.1"
@@ -23,7 +37,7 @@ resource "helm_release" "istio_base" {
     name  = "global.istioNamespace"
     value = "istio-system"
   }
-  depends_on = [ module.eks ]
+  depends_on = [ module.eks, kubernetes_namespace.istio_system ]
 }
 
 # helm repo add istio https://istio-release.storage.googleapis.com/charts
@@ -34,7 +48,7 @@ resource "helm_release" "istiod" {
 
   repository       = "https://istio-release.storage.googleapis.com/charts"
   chart            = "istiod"
-  namespace        = "istio-system"
+  namespace       = kubernetes_namespace.istio_system.metadata.0.name
   create_namespace = true
   cleanup_on_fail = true
   version          = "1.17.1"
@@ -59,7 +73,7 @@ resource "helm_release" "istiod" {
     value = "gateway"
   }
 
-  depends_on = [helm_release.istio_base]
+  depends_on = [helm_release.istio_base, kubernetes_namespace.istio_system]
 }
 
 # helm repo add istio https://istio-release.storage.googleapis.com/charts
@@ -70,15 +84,12 @@ resource "helm_release" "gateway" {
 
   repository       = "https://istio-release.storage.googleapis.com/charts"
   chart            = "gateway"
-  namespace        = "istio-ingress"
+  namespace       = kubernetes_namespace.istio_ingress.metadata.0.name
   cleanup_on_fail = true
   create_namespace = true
   version          = "1.17.1"
   timeout = 500
 
-  depends_on = [
-    helm_release.istio_base,
-    helm_release.istiod
-  ]
+  depends_on = [kubernetes_namespace.istio_ingress, helm_release.istiod]
 
 }

@@ -4,20 +4,12 @@ data "aws_route53_zone" "ingress-nginx" {
 }
 
 # CREATE CERTIFICATE WHICH IS DEPENDENT ON HAVING A DOMAIN NAME
-resource "aws_acm_certificate" "cert" {
-  domain_name               = "hullerdata.com"
-  subject_alternative_names = ["*.hullerdata.com"]
-  validation_method         = "DNS"
-
-  lifecycle {
-    create_before_destroy = true
-  }
-}
+data "aws_acm_certificate" "cert" {}
 
 # ATTACHING ROUTE53 AND THE CERTFIFCATE- CONNECTING ROUTE 53 TO THE CERTIFICATE
 resource "aws_route53_record" "cert-record" {
   for_each = {
-    for anybody in aws_acm_certificate.cert.domain_validation_options : anybody.domain_name => {
+    for anybody in data.aws_acm_certificate.cert.domain_validation_options : anybody.domain_name => {
       name   = anybody.resource_record_name
       record = anybody.resource_record_value
       type   = anybody.resource_record_type
@@ -34,7 +26,7 @@ resource "aws_route53_record" "cert-record" {
 
 # SIGN THE CERTIFICATE
 resource "aws_acm_certificate_validation" "ssl_cert" {
-  certificate_arn         = aws_acm_certificate.cert.arn
+  certificate_arn         = data.aws_acm_certificate.cert.arn
   validation_record_fqdns = [for record in aws_route53_record.cert-record : record.fqdn]
 }
 
